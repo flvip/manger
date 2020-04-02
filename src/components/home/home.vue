@@ -19,14 +19,15 @@
     </el-header>
     <el-container>
       <el-aside class="aside" width="200px">
-        <el-menu :unique-opened="true">
+        <el-menu :unique-opened="true"
+        :router="true">
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-s-home"></i>
               <span>用户管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="1-1">
+              <el-menu-item index="users">
                 <template slot="title">
                   <i class="el-icon-s-custom"></i>
                   <span>用户列表</span>
@@ -115,11 +116,7 @@
         </el-menu>
       </el-aside>
       <el-main class="main">
-        <el-table v-loading="loading" :data="tableData" style="width: 100%">
-          <el-table-column prop="date" label="日期" width="180"></el-table-column>
-          <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-          <el-table-column prop="address" label="地址"></el-table-column>
-        </el-table>
+       <router-view></router-view>
       </el-main>
     </el-container>
   </el-container>
