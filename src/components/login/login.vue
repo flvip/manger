@@ -34,13 +34,15 @@ export default {
     //找到距离异步操作有结果的代码最近的方法前面加async
     async handleLogin() {
       const res = await this.$http.post("login", this.formData);
-      console.log(res);
       const {
         data,
         meta: { msg, status }
       } = res.data;
       if (status === 200) {
+        //保存token
+        localStorage.setItem('user-token',data.token)
         console.log(data);
+        
         this.$router.push({ path: "/" });
         this.$message({
           message: msg,
