@@ -18,9 +18,11 @@
       </el-row>
     </el-header>
     <el-container>
+      
       <el-aside class="aside" width="200px">
-        <el-menu :unique-opened="true"
-        :router="true">
+         <el-button type="success" plain @click="isCollapse=!isCollapse">展开</el-button>
+        <el-menu :unique-opened="true" :router="true" :collapse="isCollapse">
+          
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-s-home"></i>
@@ -116,7 +118,7 @@
         </el-menu>
       </el-aside>
       <el-main class="main">
-       <router-view></router-view>
+        <router-view></router-view>
       </el-main>
     </el-container>
   </el-container>
@@ -198,6 +200,7 @@ export default {
   width: 200px;
   min-height: 400px;
 }
+
 .main {
   background-color: #e9eef3;
 }
