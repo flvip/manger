@@ -19,7 +19,7 @@
     </el-header>
     <el-container>
       
-      <el-aside class="aside" width="200px">
+      <el-aside class="aside" :width="asideWidth">
          <el-button type="success" plain @click="isCollapse=!isCollapse">展开</el-button>
         <el-menu :unique-opened="true" :router="true" :collapse="isCollapse">
           
@@ -129,24 +129,8 @@ export default {
   data() {
     return {
       isCollapse: true,
-      tableData: [
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        }
-      ],
-      loading: false
+      loading: false,
+      asideWidth:"200px"
     };
   },
   beforeCreate() {

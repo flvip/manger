@@ -14,6 +14,7 @@ var routes = [
     {
         name: 'home',
         path: '/',
+        redirect: '/users',
         component: Home,
         children: [
             {

@@ -33,7 +33,7 @@
       <el-table-column label="用户状态">
         <template slot-scope="usersList">
           <el-switch
-          @change="changeMsgState(usersList.row)"
+            @change="changeMsgState(usersList.row)"
             v-model="usersList.row.mg_state"
             active-color="#13ce66"
             inactive-color="#ff4949"
@@ -50,7 +50,14 @@
             plain
             @click="handelEditShow(scope.row)"
           ></el-button>
-          <el-button type="success" icon="el-icon-check" circle size="mini" plain></el-button>
+          <el-button
+            type="success"
+            icon="el-icon-check"
+            circle
+            size="mini"
+            plain
+            @click="handelCheckShow(scope.row)"
+          ></el-button>
           <el-button
             type="danger"
             icon="el-icon-delete"
@@ -63,13 +70,13 @@
       </el-table-column>
     </el-table>
     <el-pagination
-    class="pagination"
+      class="pagination"
       background
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="pagenum"
-      :page-sizes="[2, 5, 10, 20]"
-      :page-size="2"
+      :page-sizes="[5, 10, 20]"
+      :page-size="5"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
@@ -114,6 +121,27 @@
         <el-button type="primary" @click="handelEdit()">确 定</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="分配角色" :visible.sync="dialogFormVisibleRole">
+      <el-form :model="form">
+        <el-form-item label="用户名：" :label-width="formLabelWidth">{{currentUsername}}</el-form-item>
+        <el-form-item label="角色" label-width="100px">
+          <el-select v-model="currRoleId">
+            <el-option label="请选择" :value="-1"></el-option>
+            <el-option
+              v-for="(item,i) in roleNameArr"
+              :key="i"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisibleRole = false">取 消</el-button>
+        <el-button type="primary" @click="setRole()">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -125,36 +153,78 @@ export default {
     return {
       query: "",
       pagenum: 1,
-      pagesize: 2,
+      pagesize: 5,
       usersList: [],
       total: "",
       dialogFormVisibleAdd: false,
       dialogFormVisibleEdit: false,
+      dialogFormVisibleRole: false,
       form: {
         username: "",
         password: "",
         email: "",
         mobile: ""
       },
-      formLabelWidth: "80px"
+      formLabelWidth: "80px",
+      currRoleId: -1,
+      currentUsername: "",
+      roleNameArr: [],
+      currUserId: ""
     };
   },
   created() {
     this.gerUsersList();
   },
   methods: {
-      //修改用户状态
-     async changeMsgState(user){
-         console.log(user)
-         const res = await this.$http.put(`users/${user.id}/state/${user.mg_state}`)
-          const {
+    async setRole() {
+        //修改用户权限
+      const result = await this.$http.put(`users/${this.currUserId}/role`, {
+        rid: this.currRoleId
+      });
+      const {
+        meta: { msg }
+      } = result.data;
+      if (result.status === 200) {
+        if (msg === "设置角色成功") {
+          this.$message.success(msg);
+        }else {
+            this.$message.warning(msg);
+        }
+      }
+      this.dialogFormVisibleRole = false;
+      console.log(result);
+    },
+    //分配用户角色
+    async handelCheckShow(user) {
+      this.currentUsername = user.username;
+      this.dialogFormVisibleRole = true;
+      //获取所有角色
+      const res = await this.$http.get("roles");
+      const { data } = res.data;
+      this.roleNameArr = data;
+      console.log(data)
+      //通过id查询角色权限rid
+      const res1 = await this.$http.get(`users/${user.id}`);
+      const { id, rid } = res1.data.data;
+      this.currRoleId = rid;
+      //通过rid查询角色权限
+      this.currUserId = id;
+    },
+    //修改用户状态
+    async changeMsgState(user) {
+      console.log(user);
+      const res = await this.$http.put(
+        `users/${user.id}/state/${user.mg_state}`
+      );
+      const {
         meta: { msg }
       } = res.data;
-         if(res.status===200){
-             this.$message.success(msg);
-         }
-         console.log(res)
-      },
+      if (res.status === 200) {
+        this.$message.success(msg);
+      }
+
+      console.log(res);
+    },
     //编辑用户信息
     async handelEdit() {
       this.dialogFormVisibleEdit = false;
@@ -236,13 +306,13 @@ export default {
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
-      this.pagesize=val
-       this.gerUsersList();
+      this.pagesize = val;
+      this.gerUsersList();
     },
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
-      this.pagenum=val
-       this.gerUsersList();
+      this.pagenum = val;
+      this.gerUsersList();
     },
     //导出数据
     exportExcel() {
@@ -282,7 +352,6 @@ export default {
           pagesize: this.pagesize
         }
       });
-      console.log(res);
       const {
         data: { total, users },
         meta: { status }
@@ -314,7 +383,7 @@ export default {
 .table {
   margin-top: 10px;
 }
-.pagination{
-    margin-top: 10px;
+.pagination {
+  margin-top: 10px;
 }
 </style>
