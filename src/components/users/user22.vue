@@ -21,7 +21,6 @@
       </el-col>
     </el-row>
     <el-table id="out-table" class="table" :data="usersList" style="width: 100%" stripe border>
-      <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column type="index" label="#" width="66"></el-table-column>
       <el-table-column prop="username" label="姓名" width="180"></el-table-column>
       <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
@@ -81,18 +80,19 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
+
     <el-dialog title="添加用户" :visible.sync="dialogFormVisibleAdd">
-      <el-form :model="form" :rules="formRules" ref="addUserFormRef">
-        <el-form-item label="用户名" :label-width="formLabelWidth" prop="username">
+      <el-form :model="form">
+        <el-form-item label="用户名" :label-width="formLabelWidth">
           <el-input v-model="form.username" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="密码" :label-width="formLabelWidth" prop="password">
+        <el-form-item label="密码" :label-width="formLabelWidth">
           <el-input type="password" v-model="form.password" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱" :label-width="formLabelWidth" prop="email">
+        <el-form-item label="邮箱" :label-width="formLabelWidth">
           <el-input v-model="form.email" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="电话" :label-width="formLabelWidth" prop="mobile">
+        <el-form-item label="电话" :label-width="formLabelWidth">
           <el-input v-model="form.mobile" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -104,14 +104,14 @@
     </el-dialog>
 
     <el-dialog title="编辑用户" :visible.sync="dialogFormVisibleEdit">
-      <el-form :model="form" :rules="editUserFormRules" ref="editUserFormRef">
+      <el-form :model="form">
         <el-form-item label="用户名" :label-width="formLabelWidth">
           <el-input disabled v-model="form.username" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱" :label-width="formLabelWidth" prop="email">
+        <el-form-item label="邮箱" :label-width="formLabelWidth">
           <el-input v-model="form.email" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="电话" :label-width="formLabelWidth" prop="mobile">
+        <el-form-item label="电话" :label-width="formLabelWidth">
           <el-input v-model="form.mobile" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
@@ -150,25 +150,6 @@ import FileSaver from "file-saver";
 import XLSX from "xlsx";
 export default {
   data() {
-    // 自定义邮箱规则
-    var checkEmail = (rule, value, callback) => {
-      const regEmail = /^\w+@\w+(\.\w+)+$/;
-      if (regEmail.test(value)) {
-        // 合法邮箱
-        return callback();
-      }
-      callback(new Error("请输入合法邮箱"));
-    };
-    // 自定义手机号规则
-    var checkMobile = (rule, value, callback) => {
-      const regMobile = /^1[34578]\d{9}$/;
-      if (regMobile.test(value)) {
-        return callback();
-      }
-      // 返回一个错误提示
-      callback(new Error("请输入合法的手机号码"));
-    };
-
     return {
       query: "",
       pagenum: 1,
@@ -183,44 +164,6 @@ export default {
         password: "",
         email: "",
         mobile: ""
-      },
-      formRules: {
-        username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          {
-            min: 2,
-            max: 10,
-            message: "用户名的长度在2～10个字",
-            trigger: "blur"
-          }
-        ],
-        password: [
-          { required: true, message: "请输入用户密码", trigger: "blur" },
-          {
-            min: 6,
-            max: 18,
-            message: "用户密码的长度在6～18个字",
-            trigger: "blur"
-          }
-        ],
-        email: [
-          { required: true, message: "请输入邮箱", trigger: "blur" },
-          { validator: checkEmail, trigger: "blur" }
-        ],
-        mobile: [
-          { required: true, message: "请输入手机号码", trigger: "blur" },
-          { validator: checkMobile, trigger: "blur" }
-        ]
-      },
-      editUserFormRules: {
-        email: [
-          { required: true, message: "请输入邮箱", trigger: "blur" },
-          { validator: checkEmail, trigger: "blur" }
-        ],
-        mobile: [
-          { required: true, message: "请输入手机号码", trigger: "blur" },
-          { validator: checkMobile, trigger: "blur" }
-        ]
       },
       formLabelWidth: "80px",
       currRoleId: -1,
@@ -267,35 +210,31 @@ export default {
       //通过rid查询角色权限
       this.currUserId = id;
     },
+    //修改用户状态
     async changeMsgState(user) {
-      // console.log(user);
-      // const res = await this.$http.put(
-      //   `users/${user.id}/state/${user.mg_state}`
-      // );
-      // console.log(res);
-      const { data: res } = await this.$http.put(
-        `users/${user.id}/state/${user.mg_state}`
-      );
-      if (res.meta.status !== 200) {
-        user.mg_state = !user.mg_state;
-        return this.$message.error("更新用户状态失败");
-      }
-      this.$message.success("更新用户状态成功！");
+        console.log(user)
+        const res = await this.$http.put(`users/${user.id}/state/${user.mg_state}`)
+        console.log(res)
+    //   const { data: res } = await this.$http.put(
+    //     `users/${user.id}/state/${user.mg_state}`
+    //   );
+    //   if (res.meta.status !== 200) {
+    //     user.mg_state = !user.mg_state;
+    //     return this.$message.error("更新用户状态失败");
+    //   }
+    //   this.$message.success("更新用户状态成功！");
     },
     //编辑用户信息
     async handelEdit() {
+      this.dialogFormVisibleEdit = false;
       console.log(this.form);
-      this.$refs.editUserFormRef.validate(async valid => {
-        if (!valid) return;
-        this.dialogFormVisibleEdit = false;
-        const res = await this.$http.put("users/" + this.form.id, this.form);
-        const {
-          meta: { msg, status }
-        } = res.data;
-        if (status === 200) {
-          this.$message.success(msg);
-        }
-      });
+      const res = await this.$http.put("users/" + this.form.id, this.form);
+      const {
+        meta: { msg, status }
+      } = res.data;
+      if (status === 200) {
+        this.$message.success(msg);
+      }
     },
     //弹出用户编辑信息
     handelEditShow(user) {
@@ -331,26 +270,27 @@ export default {
           });
         });
     },
-    //添加用户
-    async addUser() {
-      // 提交请求前，表单预验证
-      this.$refs.addUserFormRef.validate(async valid => {
-        // console.log(valid)
-        // 表单预校验失败
-        if (!valid) return;
-        const { data: res } = await this.$http.post("users", this.form);
-        if (res.meta.status !== 201) {
-          this.$message.error("添加用户失败！");
-        }
-        this.$message.success("添加用户成功！");
-        // 隐藏添加用户对话框
-        this.dialogFormVisibleAdd = false;
-        this.gerUsersList();
-      });
-    },
     addUserShow() {
       this.dialogFormVisibleAdd = true;
       this.form = {};
+    },
+    //添加用户
+    async addUser() {
+      const res = await this.$http.post("users", this.form);
+      this.dialogFormVisibleAdd = false;
+      const {
+        meta: { status, msg },
+        data
+      } = res.data;
+      if (status === 201) {
+        this.form = {};
+
+        this.$message.success(msg);
+        console.log(data);
+        this.gerUsersList();
+      } else {
+        this.$message.warning("添加失败");
+      }
     },
     dialogFormVisible() {
       this.dialogFormVisibleAdd = false;
@@ -373,6 +313,7 @@ export default {
       this.pagenum = val;
       this.gerUsersList();
     },
+    //导出数据
     exportExcel() {
       this.pagesize = 30; //表格长度变长
       this.currentPage = 1;
@@ -402,6 +343,7 @@ export default {
     async gerUsersList() {
       const AUTH_TOKEN = localStorage.getItem("user-token");
       this.$http.defaults.headers.common["Authorization"] = AUTH_TOKEN;
+
       const res = await this.$http.get("users", {
         params: {
           query: this.query,
@@ -413,6 +355,7 @@ export default {
         data: { total, users },
         meta: { status }
       } = res.data;
+
       if (status === 200) {
         this.usersList = users;
         this.total = total;

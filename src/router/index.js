@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Login from '@/components/login/login'
-import Home from '@/components/home/home'
-import Users from '@/components/users/users'
+
+const Login = () => import('@/components/login/login')
+const Home = () => import('@/components/home/home')
+const Users = () => import('@/components/users/users')
 Vue.use(Router)
 
 var routes = [
@@ -29,4 +30,6 @@ var routes = [
 var router = new Router({
     routes
 })
+
+
 export default router
