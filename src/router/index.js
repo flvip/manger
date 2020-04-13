@@ -5,7 +5,7 @@ const Login = () => import('@/components/login/login')
 const Home = () => import('@/components/home/home')
 const Users = () => import('@/components/users/users')
 const Rights = () => import('@/components/rights/rights')
-const Role = () => import('@/components/rights/role')
+const Roles = () => import('@/components/rights/role')
 Vue.use(Router)
 
 var routes = [
@@ -31,7 +31,7 @@ var routes = [
                 component: Rights
             }, {
                 name: 'Role',
-                path: 'role',
+                path: 'roles',
                 component: Role
             }
         ]
