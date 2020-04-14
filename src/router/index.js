@@ -5,8 +5,12 @@ const Login = () => import('@/components/login/login')
 const Home = () => import('@/components/home/home')
 const Users = () => import('@/components/users/users')
 const Rights = () => import('@/components/rights/rights')
+<<<<<<< HEAD
 const Role = () => import('@/components/rights/role')
 const Goods = () => import('@/components/goods/goods')
+=======
+const Roles = () => import('@/components/rights/role')
+>>>>>>> 0c915cb121ed41873ccf22bf1c8032a291a6975c
 Vue.use(Router)
 
 var routes = [
