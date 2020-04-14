@@ -12,108 +12,39 @@
         </el-col>
         <el-col :span="8">
           <div class="logout">
-            <a @click.prevent="handleLogout">退出</a>
+            <el-dropdown>
+              <span class="el-dropdown-link">
+                <img class="avatar" src="../../assets/img/avatar.gif" alt="无法显示图片" srcset />
+                <i class="el-icon-caret-bottom el-icon--right"></i>
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item>
+                  <a href="/">返回主页</a>
+                </el-dropdown-item>
+                <el-dropdown-item>
+                  <a @click.prevent="handleLogout">退出</a>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </div>
         </el-col>
       </el-row>
     </el-header>
     <el-container>
-      
       <el-aside class="aside" :width="asideWidth">
-         <el-button type="success" plain @click="isCollapse=!isCollapse">展开</el-button>
+        <el-button type="success" plain @click="isCollapse=!isCollapse">展开</el-button>
         <el-menu :unique-opened="true" :router="true" :collapse="isCollapse">
-          
-          <el-submenu index="1">
+          <el-submenu :index="item1.order" v-for="item1 in menuList" :key="item1.id">
             <template slot="title">
               <i class="el-icon-s-home"></i>
-              <span>用户管理</span>
+              <span>{{item1.authName}}</span>
             </template>
-            <el-menu-item-group>
-              <el-menu-item index="users">
-                <template slot="title">
-                  <i class="el-icon-s-custom"></i>
-                  <span>用户列表</span>
-                </template>
-              </el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-s-grid"></i>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index="rights">
-                <template slot="title">
-                  <i class="el-icon-menu"></i>
-                  <span>角色列表</span>
-                </template>
-              </el-menu-item>
-              <el-menu-item index="role">
-                <template slot="title">
-                  <i class="el-icon-menu"></i>
-                  <span>权限列表</span>
-                </template>
-              </el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-
-          <el-submenu index="3">
-            <template slot="title">
-              <i class="el-icon-shopping-cart-1"></i>
-              <span>商品管理</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index="3-1">
-                <template slot="title">
-                  <i class="el-icon-menu"></i>
-                  <span>商品列表</span>
-                </template>
-              </el-menu-item>
-              <el-menu-item index="3-2">
-                <template slot="title">
-                  <i class="el-icon-menu"></i>
-                  <span>分类参数</span>
-                </template>
-              </el-menu-item>
-              <el-menu-item index="3-3">
-                <template slot="title">
-                  <i class="el-icon-menu"></i>
-                  <span>商品分类</span>
-                </template>
-              </el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-
-          <el-submenu index="4">
-            <template slot="title">
-              <i class="el-icon-message-solid"></i>
-              <span>订单管理</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index="4-1">
-                <template slot="title">
-                  <i class="el-icon-menu"></i>
-                  <span>订单列表</span>
-                </template>
-              </el-menu-item>
-            </el-menu-item-group>
-          </el-submenu>
-
-          <el-submenu index="5">
-            <template slot="title">
-              <i class="el-icon-s-data"></i>
-              <span>数据统计</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item index="5-1">
-                <template slot="title">
-                  <i class="el-icon-menu"></i>
-                  <span>数据报表</span>
-                </template>
-              </el-menu-item>
-            </el-menu-item-group>
+            <el-menu-item :index="item2.path" v-for="item2 in item1.children" :key="item2.id">
+              <template slot="title">
+                <i class="el-icon-s-custom"></i>
+                <span>{{item2.authName}}</span>
+              </template>
+            </el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
@@ -128,19 +59,21 @@
 export default {
   data() {
     return {
-      isCollapse: true,
+      isCollapse: false,
       loading: false,
-      asideWidth:"200px"
+      asideWidth: "200px",
+      menuList: []
     };
   },
-  beforeCreate() {
-    const token = localStorage.getItem("user-token");
-    if (!token) {
-      this.$router.push({ name: "login" });
-      this.$message.error("token 过期");
-    }
+  created() {
+    this.getMenuList();
   },
   methods: {
+    async getMenuList() {
+      const { data: res } = await this.$http.get("menus");
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
+      this.menuList = res.data;
+    },
     handleLogout() {
       localStorage.clear();
       this.$message({
@@ -172,6 +105,7 @@ export default {
 .logout {
   line-height: 60px;
   text-align: right;
+  margin-top: 10px;
 }
 .logout a {
   cursor: pointer;
@@ -187,5 +121,11 @@ export default {
 
 .main {
   background-color: #e9eef3;
+}
+.avatar {
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
 }
 </style>

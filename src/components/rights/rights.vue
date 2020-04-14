@@ -1,7 +1,7 @@
 <template>
   <el-card class="card">
     <myBread level1="权限管理" level2="角色列表"></myBread>
-    <el-table :data="roleList" border style="width: 100%" class="rightsTable" stripe>
+    <el-table :data="roleList" border style="width: 100%" class="rightsTable" height="800" stripe>
       <el-table-column type="index" label="#" width="80"></el-table-column>
       <el-table-column prop="authName" label="权限名称"></el-table-column>
       <el-table-column prop="path" label="路径"></el-table-column>
@@ -41,7 +41,7 @@ export default {
 
 <style>
 .card {
-  height: 100%;
+  /* height: 100%; */
 }
 .rightsTable {
   margin-top: 15px;
