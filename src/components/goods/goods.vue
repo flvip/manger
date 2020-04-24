@@ -1,10 +1,6 @@
 <template>
   <el-card class="box-card">
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
-    </el-breadcrumb>
+    <MyBread level1="商品管理" level2="商品列表"></MyBread>
     <el-row class="searchRow">
       <el-col>
         <el-input
@@ -12,36 +8,37 @@
           v-model="query"
           class="inputSearch"
           clearable
-          @clear="loadUsersList()"
+          @clear="loadgoodsList()"
         >
           <el-button slot="append" icon="el-icon-search" @click="handelSearch"></el-button>
         </el-input>
-        <el-button type="success" plain class="addBtn" @click="addUserShow">添加用户</el-button>
+        <el-button type="success" plain class="addBtn" @click="addGood">添加商品</el-button>
         <el-button type="success" @click="exportExcel()">导出全部</el-button>
       </el-col>
     </el-row>
-    <el-table id="out-table" class="table" :data="usersList" style="width: 100%" stripe border>
+    <el-table id="out-table" class="table" :data="goodsList" style="width: 100%" stripe border>
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column type="index" label="#" width="66"></el-table-column>
-      <el-table-column prop="username" label="姓名" width="180"></el-table-column>
-      <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
-      <el-table-column prop="mobile" label="电话" width="180"></el-table-column>
-      <el-table-column label="创建时间" width="180">
-        <template slot-scope="usersList">{{usersList.row.create_time | fmdate}}</template>
-        <!--  //--- scope.row 直接取到该单元格对象，就是数组里的元素对象，即是usersList[scope.$index]
+      <el-table-column label="商品名称" prop="goods_name" width="240px"></el-table-column>
+      <el-table-column label="商品价格(元)" prop="goods_price" width="100px"></el-table-column>
+      <el-table-column label="商品重量" prop="goods_weight" width="70px"></el-table-column>
+      <el-table-column label="商品数量" prop="goods_number" width="70px"></el-table-column>
+      <el-table-column label="创建时间" prop="add_time" width="140px">
+        <template slot-scope="goodsList">{{goodsList.row.add_time | fmdate}}</template>
+        <!--  //--- scope.row 直接取到该单元格对象，就是数组里的元素对象，即是goodsList[scope.$index]
         //---.create_time 是对象里面的create_time属性的值-->
       </el-table-column>
-      <el-table-column label="用户状态">
-        <template slot-scope="usersList">
+      <el-table-column label="商品状态" width="80px">
+        <template slot-scope="goodsList">
           <el-switch
-            @change="changeMsgState(usersList.row)"
-            v-model="usersList.row.mg_state"
+            @change="changeMsgState(goodsList.row)"
+            v-model="goodsList.row.goods_state"
             active-color="#13ce66"
             inactive-color="#ff4949"
           ></el-switch>
         </template>
       </el-table-column>
-      <el-table-column prop="role_name" label="操作" width="180">
+      <el-table-column prop="role_name" label="操作">
         <template slot-scope="scope">
           <el-button
             type="primary"
@@ -65,7 +62,7 @@
             circle
             size="mini"
             plain
-            @click="handelDelete(scope.row.id)"
+            @click="handelDelete(scope.row.goods_id)"
           ></el-button>
         </template>
       </el-table-column>
@@ -76,7 +73,7 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page="pagenum"
-      :page-sizes="[5, 10, 20]"
+      :page-sizes="[5, 20, 50]"
       :page-size="5"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
@@ -150,30 +147,11 @@ import FileSaver from "file-saver";
 import XLSX from "xlsx";
 export default {
   data() {
-    // 自定义邮箱规则
-    var checkEmail = (rule, value, callback) => {
-      const regEmail = /^\w+@\w+(\.\w+)+$/;
-      if (regEmail.test(value)) {
-        // 合法邮箱
-        return callback();
-      }
-      callback(new Error("请输入合法邮箱"));
-    };
-    // 自定义手机号规则
-    var checkMobile = (rule, value, callback) => {
-      const regMobile = /^1[34578]\d{9}$/;
-      if (regMobile.test(value)) {
-        return callback();
-      }
-      // 返回一个错误提示
-      callback(new Error("请输入合法的手机号码"));
-    };
-
     return {
       query: "",
       pagenum: 1,
       pagesize: 5,
-      usersList: [],
+      goodsList: [],
       total: "",
       dialogFormVisibleAdd: false,
       dialogFormVisibleEdit: false,
@@ -184,44 +162,7 @@ export default {
         email: "",
         mobile: ""
       },
-      formRules: {
-        username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
-          {
-            min: 2,
-            max: 10,
-            message: "用户名的长度在2～10个字",
-            trigger: "blur"
-          }
-        ],
-        password: [
-          { required: true, message: "请输入用户密码", trigger: "blur" },
-          {
-            min: 6,
-            max: 18,
-            message: "用户密码的长度在6～18个字",
-            trigger: "blur"
-          }
-        ],
-        email: [
-          { required: true, message: "请输入邮箱", trigger: "blur" },
-          { validator: checkEmail, trigger: "blur" }
-        ],
-        mobile: [
-          { required: true, message: "请输入手机号码", trigger: "blur" },
-          { validator: checkMobile, trigger: "blur" }
-        ]
-      },
-      editUserFormRules: {
-        email: [
-          { required: true, message: "请输入邮箱", trigger: "blur" },
-          { validator: checkEmail, trigger: "blur" }
-        ],
-        mobile: [
-          { required: true, message: "请输入手机号码", trigger: "blur" },
-          { validator: checkMobile, trigger: "blur" }
-        ]
-      },
+
       formLabelWidth: "80px",
       currRoleId: -1,
       currentUsername: "",
@@ -230,7 +171,7 @@ export default {
     };
   },
   created() {
-    this.gerUsersList();
+    this.gerGoodsList();
   },
   methods: {
     async setRole() {
@@ -304,15 +245,14 @@ export default {
       console.log(user);
     },
     //删除用户
-    handelDelete(userId) {
-      this.$confirm("删除用户, 是否继续?", "提示", {
+    handelDelete(goodId) {
+      this.$confirm("删除商品, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(async () => {
-          const res = await this.$http.delete("users/" + userId);
-          console.log(res);
+          const res = await this.$http.delete("goods/" + goodId);
           const {
             meta: { msg }
           } = res.data;
@@ -321,7 +261,7 @@ export default {
               type: "success",
               message: msg
             });
-            this.gerUsersList();
+            this.gerGoodsList();
           }
         })
         .catch(() => {
@@ -331,6 +271,10 @@ export default {
           });
         });
     },
+    addGood() {
+      this.$router.push({name:'Add'});
+    },
+
     //添加用户
     async addUser() {
       // 提交请求前，表单预验证
@@ -345,7 +289,7 @@ export default {
         this.$message.success("添加用户成功！");
         // 隐藏添加用户对话框
         this.dialogFormVisibleAdd = false;
-        this.gerUsersList();
+        this.gerGoodsList();
       });
     },
     addUserShow() {
@@ -356,22 +300,22 @@ export default {
       this.dialogFormVisibleAdd = false;
     },
     //重新加载
-    loadUsersList() {
-      this.gerUsersList();
+    loadgoodsList() {
+      this.gerGoodsList();
     },
     //搜索用户
     handelSearch() {
-      this.gerUsersList();
+      this.gerGoodsList();
     },
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
       this.pagesize = val;
-      this.gerUsersList();
+      this.gerGoodsList();
     },
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
       this.pagenum = val;
-      this.gerUsersList();
+      this.gerGoodsList();
     },
     exportExcel() {
       this.pagesize = 30; //表格长度变长
@@ -399,22 +343,23 @@ export default {
     },
     //`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`
     //获取用户
-    async gerUsersList() {
+    async gerGoodsList() {
       // const AUTH_TOKEN = localStorage.getItem("token");
       // this.$http.defaults.headers.common["Authorization"] = AUTH_TOKEN;
-      const res = await this.$http.get("users", {
+      const res = await this.$http.get("goods", {
         params: {
           query: this.query,
           pagenum: this.pagenum,
           pagesize: this.pagesize
         }
       });
+      console.log(res);
       const {
-        data: { total, users },
+        data: { total, goods },
         meta: { status }
       } = res.data;
       if (status === 200) {
-        this.usersList = users;
+        this.goodsList = goods;
         this.total = total;
         // this.$message(msg);
       }

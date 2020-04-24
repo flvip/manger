@@ -5,12 +5,13 @@ const Login = () => import('@/components/login/login')
 const Home = () => import('@/components/home/home')
 const Users = () => import('@/components/users/users')
 const Rights = () => import('@/components/rights/rights')
-<<<<<<< HEAD
 const Role = () => import('@/components/rights/role')
 const Goods = () => import('@/components/goods/goods')
-=======
-const Roles = () => import('@/components/rights/role')
->>>>>>> 0c915cb121ed41873ccf22bf1c8032a291a6975c
+const Add = () => import('@/components/goods/add')
+const Cate = () => import('@/components/goods/categories')
+const Params = () => import('@/components/goods/params')
+const Orders = () => import('@/components/orders/orders')
+const Reports = () => import('@/components/reports/reports')
 Vue.use(Router)
 
 var routes = [
@@ -41,6 +42,26 @@ var routes = [
                 name: 'Goods',
                 path: 'goods',
                 component: Goods
+            }, {
+                name: 'Add',
+                path: 'add',
+                component: Add
+            }, {
+                name: 'Cate',
+                path: 'categories',
+                component: Cate
+            }, {
+                name: 'Params',
+                path: 'params',
+                component: Params
+            }, {
+                name: 'Orders',
+                path: 'orders',
+                component: Orders
+            }, {
+                name: 'Reports',
+                path: 'reports',
+                component: Reports
             }
         ]
     }
@@ -60,11 +81,12 @@ router.beforeEach((to, from, next) => {
     if (!tokenStr) {
         Message.warning('请登录后操作！')
         router.push({
-            name: 'login'})
-        }
+            name: 'login'
+        })
+    }
     return next()
-    
-    
+
+
 })
 
 export default router

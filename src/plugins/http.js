@@ -10,6 +10,7 @@ myHttp.install = (Vue) => {
     axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
     axios.interceptors.request.use(function (config) {
         //console.log(config)
+        
         return config;
     }, function (error) {
         // 对请求错误做些什么

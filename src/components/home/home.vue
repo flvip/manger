@@ -31,17 +31,29 @@
       </el-row>
     </el-header>
     <el-container>
-      <el-aside class="aside" :width="asideWidth">
-        <el-button type="success" plain @click="isCollapse=!isCollapse">展开</el-button>
-        <el-menu :unique-opened="true" :router="true" :collapse="isCollapse">
+      <el-aside class="aside" :width="isCollapse ? '64px' : '200px'">
+        <div class="toggle-button" @click="togleCollapse">|||</div>
+        <el-menu 
+        class="menu"
+          :unique-opened="true"
+          :router="true"
+          :collapse="isCollapse"
+          :collapse-transition="false"
+          :default-active="activePath"
+        >
           <el-submenu :index="item1.order" v-for="item1 in menuList" :key="item1.id">
             <template slot="title">
-              <i class="el-icon-s-home"></i>
+              <i :class="iconObj[item1.id]"></i>
               <span>{{item1.authName}}</span>
             </template>
-            <el-menu-item :index="item2.path" v-for="item2 in item1.children" :key="item2.id">
+            <el-menu-item
+              :index="item2.path"
+              v-for="item2 in item1.children"
+              :key="item2.id"
+              @click="saveNavState('/' + item2.path)"
+            >
               <template slot="title">
-                <i class="el-icon-s-custom"></i>
+                <i :class="iconObj[item2.id]"></i>
                 <span>{{item2.authName}}</span>
               </template>
             </el-menu-item>
@@ -62,17 +74,42 @@ export default {
       isCollapse: false,
       loading: false,
       asideWidth: "200px",
-      menuList: []
+      menuList: [],
+      iconObj: {
+        "125": "el-icon-s-custom",
+        "103": "el-icon-user",
+        "101": "el-icon-shopping-cart-2",
+        "102": "el-icon-s-comment",
+        "145": "el-icon-s-data",
+        "110": "el-icon-user-solid",
+        "111": "el-icon-s-tools",
+        "112": "el-icon-setting",
+        "104": "el-icon-shopping-cart-full",
+        "115": "el-icon-shopping-cart-full",
+        "121": "el-icon-shopping-cart-full",
+        "107": "el-icon-message-solid",
+        "146": "el-icon-s-marketing"
+      },
+      activePath: ""
     };
   },
   created() {
     this.getMenuList();
+    this.activePath = window.sessionStorage.getItem("activePath");
   },
   methods: {
+    // 保存连接的激活地址
+    saveNavState(activePath) {
+      window.sessionStorage.setItem("activePath", activePath);
+    },
+    togleCollapse() {
+      this.isCollapse = !this.isCollapse;
+    },
     async getMenuList() {
       const { data: res } = await this.$http.get("menus");
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg);
       this.menuList = res.data;
+      
     },
     handleLogout() {
       localStorage.clear();
@@ -97,7 +134,8 @@ export default {
   color: #fff;
 }
 .logo_img {
-  width: 60px;
+  width: 50px;
+  height: 50px;
 }
 .middle_text {
   text-align: center;
@@ -114,10 +152,6 @@ export default {
 .aside {
   background-color: #d3dce6;
 }
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-  width: 200px;
-  min-height: 400px;
-}
 
 .main {
   background-color: #e9eef3;
@@ -128,4 +162,15 @@ export default {
   height: 40px;
   border-radius: 10px;
 }
+.toggle-button {
+  height: 40px;
+  background-color: #4a5064;
+  font-size: 18px;
+  line-height: 40px;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+
 </style>
