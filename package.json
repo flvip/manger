@@ -10,6 +10,7 @@
   "dependencies": {
     "core-js": "^3.6.4",
     "css-loader": "^3.5.2",
+    "echarts": "^4.7.0",
     "element-tree-grid": "^0.1.3",
     "element-ui": "^2.13.0",
     "elementui_treegrid": "0.0.4",
